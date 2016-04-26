@@ -1,0 +1,13 @@
+application: cronbot
+version: 1
+runtime: go
+api_version: go1
+env_variables:
+  SLACKGW_ENDPOINT: http://slackgw.builderscon.io:4979
+  SLACKGW_TOKEN: ***FILL ME***
+  GITHUB_TOKEN: ***FILL ME***
+
+handlers:
+  - url: /minutes/remind
+    script: _go_app
+    login: admin

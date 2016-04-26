@@ -1,0 +1,5 @@
+cron:
+  - description: Remind people about writing weekly reminders
+    url: /minutes/remind
+    schedule: every monday 10:00
+    timezone: Asia/Tokyo
