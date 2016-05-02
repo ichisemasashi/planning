@@ -2,6 +2,7 @@ package cronbot
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -56,6 +57,13 @@ func doMinutesRemind(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	localpath := now.Format("minutes/2006/0102.md")
 	githuburl := "https://api.github.com/repos/builderscon/planning/contents/" + localpath
+	content := base64.StdEncoding.EncodeToString([]byte(
+		"# Minutes (" + now.Format("2006/01/02") + ")\n" +
+			"\n" +
+			"Please read the README for the format of these minutes\n\n" +
+			"## lestrrat\n",
+	))
+
 	buf := bytes.Buffer{}
 	json.NewEncoder(&buf).Encode(map[string]interface{}{
 		"message": "create a new minutes",
@@ -63,21 +71,27 @@ func doMinutesRemind(w http.ResponseWriter, r *http.Request) {
 			"name":  "builderscon cronbot",
 			"email": "builderscon.io@gmail.com",
 		},
-		"content": "# Minutes (" + now.Format("2006/01/02") + ")\n" +
-			"\n" +
-			"Please read the README for the format of these minutes\n\n" +
-			"## lestrrat\n",
+		"content": content,
 	})
 	req, err := http.NewRequest("PUT", githuburl, &buf)
 	if err != nil {
 		httpError(ctx, w, r, "failed to create request to create new minutes: %s", err)
 		return
 	}
-	req.Header.Set("Authorization", "Basic "+githubtoken)
+	req.Header.Set("Authorization", "token "+githubtoken)
 	req.Header.Set("Content-Type", "application/json")
-	_, err = client.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		httpError(ctx, w, r, "failed to make HTTP request: %s", err)
+		return
+	}
+
+	switch res.StatusCode {
+	case http.StatusOK, http.StatusCreated:
+		// OK. do nothing
+	default:
+		// yawza!
+		httpError(ctx, w, r, "invalid response from github: %s", res.Status)
 		return
 	}
 
@@ -100,7 +114,7 @@ func doMinutesRemind(w http.ResponseWriter, r *http.Request) {
 	req.Header.Set("X-Slackgw-Auth", token)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	res, err := client.Do(req)
+	res, err = client.Do(req)
 	if err != nil {
 		httpError(ctx, w, r, "failed to make HTTP request: %s", err)
 		return
