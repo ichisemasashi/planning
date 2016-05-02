@@ -3,44 +3,59 @@ package cronbot
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
 
+	"golang.org/x/net/context"
+
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/urlfetch"
 )
 
 func init() {
+	http.HandleFunc("/", doHello)
 	http.HandleFunc("/minutes/remind", doMinutesRemind)
 }
 
+func httpError(ctx context.Context, w http.ResponseWriter, r *http.Request, s string, args ...interface{}) {
+	msg := fmt.Sprintf(s, args...)
+	log.Errorf(ctx, msg)
+	http.Error(w, msg, http.StatusInternalServerError)
+}
+
+func doHello(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Hello, World!")
+}
+
 func doMinutesRemind(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
 	endpoint := os.Getenv("SLACKGW_ENDPOINT")
 	if endpoint == "" {
-		http.Error(w, "missing SLACKGW_ENDPOINT", http.StatusInternalServerError)
+		httpError(ctx, w, r, "missing SLACKGW_ENDPOINT")
 		return
 	}
 
 	token := os.Getenv("SLACKGW_TOKEN")
 	if token == "" {
-		http.Error(w, "missing SLACKGW_TOKEN", http.StatusInternalServerError)
+		httpError(ctx, w, r, "missing SLACKGW_TOKEN")
 		return
 	}
 
 	githubtoken := os.Getenv("GITHUB_TOKEN")
 	if githubtoken == "" {
-		http.Error(w, "missing GITHUB_TOKEN", http.StatusInternalServerError)
+		httpError(ctx, w, r, "missing GITHUB_TOKEN")
 		return
 	}
 
-	ctx := appengine.NewContext(r)
 	client := urlfetch.Client(ctx)
 
 	now := time.Now()
 	localpath := now.Format("minutes/2006/0102.md")
-	path := "/repos/builderscon/planning/contents/" + localpath
+	githuburl := "https://api.github.com/repos/builderscon/planning/contents/" + localpath
 	buf := bytes.Buffer{}
 	json.NewEncoder(&buf).Encode(map[string]interface{}{
 		"message": "create a new minutes",
@@ -53,16 +68,16 @@ func doMinutesRemind(w http.ResponseWriter, r *http.Request) {
 			"Please read the README for the format of these minutes\n\n" +
 			"## lestrrat\n",
 	})
-	req, err := http.NewRequest("PUT", path, &buf)
+	req, err := http.NewRequest("PUT", githuburl, &buf)
 	if err != nil {
-		http.Error(w, "failed to create request to create new minutes: "+err.Error(), http.StatusInternalServerError)
+		httpError(ctx, w, r, "failed to create request to create new minutes: %s", err)
 		return
 	}
 	req.Header.Set("Authorization", "Basic "+githubtoken)
 	req.Header.Set("Content-Type", "application/json")
 	_, err = client.Do(req)
 	if err != nil {
-		http.Error(w, "failed to make HTTP request: "+err.Error(), http.StatusInternalServerError)
+		httpError(ctx, w, r, "failed to make HTTP request: %s", err)
 		return
 	}
 
@@ -70,8 +85,8 @@ func doMinutesRemind(w http.ResponseWriter, r *http.Request) {
 	buf.WriteString(
 		(url.Values{
 			"message": []string{
-				"月曜日です！祝日じゃなければ週報を書いてくださいね！\n"+
-				"https://github.com/builderscon/planning/tree/master/" + localpath,
+				"月曜日です！祝日じゃなければ週報を書いてくださいね！\n" +
+					"https://github.com/builderscon/planning/tree/master/" + localpath,
 			},
 			"channel": []string{"#random"},
 		}).Encode(),
@@ -79,7 +94,7 @@ func doMinutesRemind(w http.ResponseWriter, r *http.Request) {
 
 	req, err = http.NewRequest("POST", endpoint+"/post", &buf)
 	if err != nil {
-		http.Error(w, "failed to create HTTP request: "+err.Error(), http.StatusInternalServerError)
+		httpError(ctx, w, r, "failed to create HTTP request: %s", err)
 		return
 	}
 	req.Header.Set("X-Slackgw-Auth", token)
@@ -87,12 +102,12 @@ func doMinutesRemind(w http.ResponseWriter, r *http.Request) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		http.Error(w, "failed to make HTTP request: "+err.Error(), http.StatusInternalServerError)
+		httpError(ctx, w, r, "failed to make HTTP request: %s", err)
 		return
 	}
 
 	if res.StatusCode != http.StatusOK {
-		http.Error(w, "received invalid response: "+res.Status, http.StatusInternalServerError)
+		httpError(ctx, w, r, "received invalid response: %s", res.Status)
 		return
 	}
 

@@ -8,6 +8,8 @@ env_variables:
   GITHUB_TOKEN: ***FILL ME***
 
 handlers:
+  - url: /
+    script: _go_app
   - url: /minutes/remind
     script: _go_app
     login: admin
