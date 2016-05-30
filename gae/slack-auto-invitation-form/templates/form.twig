@@ -1,0 +1,51 @@
+{% extends "layout.twig" %}
+{% block content %}
+    <style>
+        .form-signin {
+            max-width: 330px;
+            padding: 15px;
+            margin: 0 auto;
+        }
+    </style>
+
+    <div style="text-align:center">
+        <h2>Invitation request form for the "{{ team_name }}" slack team.</h2>
+        <img src="{{ logo_url }}">
+    </div>
+
+    <form class="form-signin" action="{{ path_for('submit') }}" method="post">
+        <input type="hidden" name="csrf_name" value="{{ csrf_name }}">
+        <input type="hidden" name="csrf_value" value="{{ csrf_value }}">
+
+        <h2 class="form-signin-heading">Please fill in</h2>
+
+        <div class="form-group">
+            <label>Email address (require)</label>
+            <input type="email" class="form-control" placeholder="xxx@xxx.xxx" required autofocus name="email"
+                   value="{{ email }}">
+            <span style="color:red;">{{ error_list.email }}</span>
+        </div>
+
+        <div class="form-group">
+            <label>First name (require)</label>
+            <input type="text" class="form-control" placeholder="jhon" required name="first_name"
+                   value="{{ first_name }}">
+            <span style="color:red;">{{ error_list.first_name }}</span>
+        </div>
+
+        <div class="form-group">
+            <label>Last name (require)</label>
+            <input type="text" class="form-control" placeholder="doe" required name="last_name" value="{{ last_name }}">
+            <span style="color:red;">{{ error_list.last_name }}</span>
+        </div>
+
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Request Invitation</button>
+    </form>
+
+    <hr>
+    <div style="text-align:right">
+        <small>Do you want to check the code? <a href="https://github.com/uzulla/slack-auto-invitation-form.php">github/uzulla/slack-auto-invitation-form.php</a>
+        </small>
+    </div>
+
+{% endblock %}
