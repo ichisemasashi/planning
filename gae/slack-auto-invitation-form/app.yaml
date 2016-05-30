@@ -5,5 +5,7 @@ runtime: php55
 api_version: 1
 
 handlers:
+- url: /assets
+  static_dir: assets
 - url: /.*
   script: public/index.php
