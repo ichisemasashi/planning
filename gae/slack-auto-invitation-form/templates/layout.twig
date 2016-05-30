@@ -1,21 +1,44 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>Invitation request form</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>Join builderscon Slack</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@builderscon">
+<meta property="fb:app_id" content="1537973726511652" />
+<meta property="og:title" content="builderscon">
+<meta property="og:site_name" content="builderscon">
+<meta property="og:type" content="website">
+<meta property="og:url" content="http://builderscon.io">
+<meta property="og:image" content="http://builderscon.io/assets/images/hex_logo.png">
+<meta property="og:description" content="builderscon is a festival for the technology lovers.
+">
+<link rel="shortcut icon" href="{{ team_url }}/assets/images/favicon.ico">
+<link rel="stylesheet" href="{{ team_url }}/assets/css/style.css" />
+<!--link rel="stylesheet" href="{{ team_url }}/assets/css/demo.css" /-->
 </head>
 <body>
-
-<div class="container">
-    <div class="jumbotron">
-        {% block content %}{% endblock %}
-    </div>
+<div id="wrapper">
+<header id="header">
+<div class="inner">
+<h1><a href="http://builderscon.io"><img src="{{ team_url }}/assets/images/logo.png" alt="builderscon" /></a></h1>
+<div class="btn-menu"><a href="#menu"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></a></div><!--  / .btn-menu /  -->
+</div><!--  / .inner /  -->
+<nav id="menu">
+<div id="gnavi">
+<ul class="menu">
+<li><a href="http://builderscon.io">HOME</a></li>
+<li><a href="http://blog.builderscon.io">BLOG</a></li>
+</ul>
+</div><!--  / #gnavi /  -->
+</nav>
+</header>
+<div id="contents">
+   {% block content %}{% endblock %}
 </div>
-
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
-        integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
-        crossorigin="anonymous"></script>
-</body>
+</div>
 </html>

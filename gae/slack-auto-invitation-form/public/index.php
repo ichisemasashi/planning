@@ -36,6 +36,7 @@ $container['errorHandler'] = function ($container) {
             )
         );
         return $container->view->render($response, 'error.twig', [
+            'team_url' => TEAM_URL,
             'error_message' => $exception->getMessage()
         ]);
     };
@@ -48,7 +49,8 @@ $app->get('/', function (\Psr\Http\Message\ServerRequestInterface $request, $res
         'csrf_name' => (string)$request->getAttribute('csrf_name'),
         'csrf_value' => (string)$request->getAttribute('csrf_value'),
         'logo_url' => $team_info['icon_url'],
-        'team_name' => $team_info['name']
+        'team_name' => $team_info['name'],
+        'team_url' => TEAM_URL
     ]);
 })->setName('form');
 
@@ -84,7 +86,8 @@ $app->post('/submit', function (\Psr\Http\Message\ServerRequestInterface $reques
             'last_name' => $last_name,
             'error_list' => $error_list,
             'logo_url' => $team_info['icon_url'],
-            'team_name' => $team_info['name']
+            'team_name' => $team_info['name'],
+            'team_url' => TEAM_URL
         ]);
     }
 
@@ -95,7 +98,9 @@ $app->post('/submit', function (\Psr\Http\Message\ServerRequestInterface $reques
 })->setName('submit');
 
 $app->get('/finish', function (\Psr\Http\Message\ServerRequestInterface $request, $response, $args) {
-    $this->view->render($response, 'finish.twig');
+    $this->view->render($response, 'finish.twig', [
+            'team_url' => TEAM_URL
+    ]);
 })->setName('finish');
 
 $app->run();
